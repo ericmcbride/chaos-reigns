@@ -15,17 +15,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Have to make this a flag type so you dont have to deal with converting
-	// a kube api.Config object to a *test.Config object
 	configPath := kubePath + "/../kube.config"
 	kubeConfig := flag.String("kubeConfig", configPath, "Kube config to be used")
-	//hostName := flag.String("hostName", "", "host name for the istio files ex. ml-intent-svc")
-	//delete := flag.Bool("delete", false, "Delete the VS and DR?")
-	//user := flag.String("user", "", "user value for http header matching")
-	//version := flag.String("version", "", "version hash for destination routing")
 	flag.Parse()
 
-	// create *rest.Config object
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeConfig)
 	if err != nil {
 		log.Fatal(err)
