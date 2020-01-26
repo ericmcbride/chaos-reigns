@@ -63,6 +63,7 @@ pub async fn delete_destination_rule(
     svc: &str,
     namespace: &str,
 ) -> Result<(), Box<dyn ::std::error::Error>> {
+    println!("Deleting Destination Rule for {}", svc);
     let dr: Api<DestinationRule> = Api::customResource(client.clone(), "destinationrules")
         .version("v1alpha3")
         .group("networking.istio.io")
@@ -77,6 +78,7 @@ pub async fn delete_virtual_service(
     svc: &str,
     namespace: &str,
 ) -> Result<(), Box<dyn ::std::error::Error>> {
+    println!("Deleting Virtual Service for {}", svc);
     let vs: Api<VirtualService> = Api::customResource(client.clone(), "virtualservices")
         .version("v1alpha3")
         .group("networking.istio.io")

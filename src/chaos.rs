@@ -1,5 +1,5 @@
 use kube_async::client::APIClient;
-use std::{thread, time};
+use std::io::{Error, ErrorKind};
 use structopt::StructOpt;
 
 #[derive(Clone, Debug, StructOpt)]
@@ -13,33 +13,133 @@ pub struct Opts {
     #[structopt(short, long)]
     pub random: bool,
 
-    /// What kind of test is going to be ran
-    #[structopt(short, long, required_unless("random"))]
-    chaos_type: Option<String>,
+    /// Kubernetes Namespace for tests to be ran on
+    #[structopt(short, long, env = "CHAOS_NAMESPACE", hide_env_values = true)]
+    pub namespace: String,
 
-    /// User needs to route via header this is the value
-    #[structopt(long, requires("header-key"))]
-    header_value: Option<String>,
-
-    /// Header key to be passed to request in istio
-    #[structopt(long, requires("header-value"))]
-    header_key: Option<String>,
-
-    /// Delay for fault injection ex: 7s
-    #[structopt(short, long, required_if("chaos-type", "fault"))]
-    delay: Option<String>,
-
-    /// Percentage of traffic to be effected by Fault Injection ex 100
-    #[structopt(short, long, required_if("chaos-type", "fault"))]
-    traffic_percentage: Option<String>,
-
-    /// What service should be attacked
-    #[structopt(short, long, required_unless("random"))]
+    /// What service should be attacked in the kubernetes namespace
+    #[structopt(
+        short,
+        long,
+        env = "CHAOS_SERVICE",
+        required_unless("random"),
+        hide_env_values = true
+    )]
     pub service: Option<String>,
 
-    /// Namespace of tests
+    /// Delete applied rules
     #[structopt(short, long)]
-    pub namespace: String,
+    pub delete: bool,
+
+    /// What kind of Istio Fault tolerance is going to be ran
+    #[structopt(
+        short,
+        long,
+        env = "CHAOS_TYPE",
+        required_unless("random"),
+        required_unless("delete"),
+        hide_env_values = true
+    )]
+    pub chaos_type: Option<String>,
+
+    /// User needs to route via header this is the value
+    #[structopt(
+        long,
+        env = "CHAOS_HEADER_VALUE",
+        requires("header-key"),
+        hide_env_values = true
+    )]
+    pub header_value: Option<String>,
+
+    /// Header key to be passed to request in istio
+    #[structopt(
+        long,
+        env = "CHAOS_HEADER_KEY",
+        requires("header-value"),
+        hide_env_values = true
+    )]
+    pub header_key: Option<String>,
+
+    /// Simulated Delay for requests coming to envoy ex: 7s for Fault
+    #[structopt(
+        long,
+        env = "CHAOS_DELAY",
+        default_value = "7s",
+        hide_env_values = true
+    )]
+    pub delay: String,
+
+    /// Percentage of traffic ex 100 for Fault
+    #[structopt(
+        long,
+        env = "CHAOS_TRAFFIC_PERCENTAGE",
+        default_value = "100",
+        hide_env_values = true
+    )]
+    pub traffic_percentage: String,
+
+    /// Max TCP Connections for Circuit
+    #[structopt(
+        long,
+        env = "CHAOS_MAX_CONNECTIONS",
+        default_value = "1",
+        hide_env_values = true
+    )]
+    pub max_connections: usize,
+
+    /// Max Pending HTTP1 Requests for Circuit
+    #[structopt(
+        long,
+        env = "CHAOS_MAX_PENDING_REQUESTS",
+        default_value = "1",
+        hide_env_values = true
+    )]
+    pub max_pending_reqs: usize,
+
+    /// Setting to 1 disables keep-alive for Circuit
+    #[structopt(
+        long,
+        env = "CHAOS_MAX_REQUESTS_PER_CONN",
+        default_value = "1",
+        hide_env_values = true
+    )]
+    pub max_requests_per_conn: usize,
+
+    /// Number of 5xx before host is ejected for Circuit
+    #[structopt(
+        long,
+        env = "CHAOS_CONSECUTIVE_ERRORS",
+        default_value = "20",
+        hide_env_values = true
+    )]
+    pub consecutive_errors: usize,
+
+    /// Time interval between ejection sweep analysis for Circuit
+    #[structopt(
+        long,
+        env = "CHAOS_INTERVAL",
+        default_value = "1s",
+        hide_env_values = true
+    )]
+    pub interval: String,
+
+    /// Min amount of time host is ejected for Circuit
+    #[structopt(
+        long,
+        env = "CHAOS_BASE_EJECT_TIME",
+        default_value = "3m",
+        hide_env_values = true
+    )]
+    pub base_eject_time: String,
+
+    /// Max % of load balancer pool containers that can be ejected for Circuit
+    #[structopt(
+        long,
+        env = "CHAOS_MAX_EJECT_PERCENT",
+        default_value = "100",
+        hide_env_values = true
+    )]
+    pub max_eject_percent: usize,
 }
 
 pub fn get_chaos_opts() -> Opts {
@@ -52,21 +152,39 @@ pub async fn chaos_reigns(
     svc: &str,
     opts: &Opts,
 ) -> Result<(), Box<dyn ::std::error::Error>> {
-    println!("About to reign chaos on {}", svc);
-    // make this end up getting random or based off opts
     let crd_name = format!("{}-chaos", &svc);
 
-    // Do destination rules first if needed
-    let vs_json = crate::fault::get_fault_injection_json_all_vs(&svc, &crd_name, &opts.namespace);
-    let _ = crate::istio::create_virtual_service(&client, &opts.namespace, vs_json).await?;
+    if opts.random {
+        return Err(Box::new(Error::new(
+            ErrorKind::Other,
+            "random only partially implemented, feature coming soon",
+        )));
+    }
 
-    println!("We Waiting");
-    let ten_millis = time::Duration::from_secs(60);
-    thread::sleep(ten_millis);
-    println!("Deleting VS");
+    // Always delete the virtual service first to make sure 503s dont happen
+    if opts.delete {
+        // Ignore errors here, to make it easier to delete stuff
+        let _ = crate::istio::delete_virtual_service(&client, &crd_name, &opts.namespace).await;
+        let _ = crate::istio::delete_destination_rule(&client, &crd_name, &opts.namespace).await;
+        return Ok(());
+    }
 
-    let _ = crate::istio::delete_virtual_service(&client, &crd_name, &opts.namespace).await?;
+    println!("About to reign chaos on {}", svc);
+    let _ = run_tests(&client, &svc, &crd_name, &opts).await?;
     Ok(())
+}
+
+async fn run_tests(
+    client: &APIClient,
+    svc: &str,
+    crd_name: &str,
+    opts: &Opts,
+) -> Result<(), Box<dyn ::std::error::Error>> {
+    match &opts.chaos_type.as_ref().unwrap()[..] {
+        "fault" => crate::fault::run_fault_test(&client, &svc, &crd_name, &opts).await,
+        "circuit" => crate::circuit::run_circuit_test(&client, &svc, &crd_name, &opts).await,
+        _ => Err(Box::new(Error::new(ErrorKind::Other, "invalid chaos type"))),
+    }
 }
 
 fn get_random_chaos() {}

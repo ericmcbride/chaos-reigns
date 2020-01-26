@@ -1,6 +1,7 @@
 use kube_async::{client::APIClient, config};
 
 mod chaos;
+mod circuit;
 mod fault;
 mod istio;
 mod kube;
@@ -11,19 +12,14 @@ async fn main() -> Result<(), Box<dyn ::std::error::Error>> {
     let client = APIClient::new(config);
     let opts = chaos::get_chaos_opts();
 
-    // add conditionals later on
-    // if svc is passed in on command line, need to make sure service exists
-
     //gotta figure this out
     let inner_opts = opts.clone();
-    
     let svc = if opts.random {
         kube::get_random_svc(&client, &inner_opts.namespace).await?
     } else {
         inner_opts.service.unwrap()
     };
 
-    println!("Service is {:?}", svc);
     chaos::chaos_reigns(&client, &svc, &opts).await?;
     Ok(())
 }
