@@ -1,6 +1,6 @@
 use kube_async::client::APIClient;
-use structopt::StructOpt;
 use std::io::{Error, ErrorKind};
+use structopt::StructOpt;
 
 #[derive(Clone, Debug, StructOpt)]
 #[structopt(
@@ -60,7 +60,7 @@ pub struct Opts {
     )]
     pub header_key: Option<String>,
 
-    /// Simulated Delay for requests coming to envoy ex: 7s for Fault
+    /// Simulated Delay for requests coming to envoy ex: 7s for Global
     #[structopt(
         long,
         env = "CHAOS_DELAY",
@@ -69,14 +69,14 @@ pub struct Opts {
     )]
     pub delay: String,
 
-    /// Percentage of traffic ex 100 for Fault
+    /// Percentage of traffic ex 100 for Global
     #[structopt(
         long,
         env = "CHAOS_TRAFFIC_PERCENTAGE",
         default_value = "100",
         hide_env_values = true
     )]
-    pub traffic_percentage: String,
+    pub traffic_percentage: usize,
 
     /// Max TCP Connections for Circuit
     #[structopt(

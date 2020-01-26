@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn ::std::error::Error>> {
 
     if opts.random {
         println!("random only partially implemented, feature coming soon");
-        return Ok(())
+        return Ok(());
     }
 
     //gotta figure this out

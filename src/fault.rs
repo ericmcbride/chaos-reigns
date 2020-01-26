@@ -9,15 +9,9 @@ pub async fn run_fault_test(
     opts: &crate::chaos::Opts,
 ) -> Result<(), Box<dyn ::std::error::Error>> {
     let vs_json = if opts.header_value.is_some() {
-        get_fault_injection_json_header_vs(
-            &svc,
-            &crd_name,
-            &opts.namespace,
-            &opts.header_value.as_ref().unwrap(),
-            &opts.header_key.as_ref().unwrap(),
-        )
+        get_fault_injection_json_header_vs(&svc, &crd_name, &opts)
     } else {
-        get_fault_injection_json_all_vs(&svc, &crd_name, &opts.namespace)
+        get_fault_injection_json_all_vs(&svc, &crd_name, &opts)
     };
 
     let _ = crate::istio::create_virtual_service(&client, &opts.namespace, vs_json).await?;
@@ -25,13 +19,16 @@ pub async fn run_fault_test(
 }
 
 // Fault injection doesnt use destinatin rules
-pub fn get_fault_injection_json_all_vs(svc: &str, dr_name: &str, namespace: &str) -> value::Value {
+pub fn get_fault_injection_json_all_vs(
+    svc: &str,
+    dr_name: &str,
+    opts: &crate::chaos::Opts,
+) -> value::Value {
     return json!({
         "apiVersion": "networking.istio.io/v1alpha3",
         "kind": "VirtualService",
-        "metadata": { "name": dr_name, "namespace": namespace},
-        "spec": {
-            "hosts": [svc],
+        "metadata": { "name": dr_name, "namespace": &opts.namespace},
+        "spec": { "hosts": [svc],
             "http": [{
                 "route": [{
                     "destination": {
@@ -40,9 +37,9 @@ pub fn get_fault_injection_json_all_vs(svc: &str, dr_name: &str, namespace: &str
                 }],
                 "fault": {
                     "delay": {
-                        "fixedDelay": "7s",
+                        "fixedDelay": &opts.delay,
                         "percentage": {
-                            "value": 100
+                            "value": &opts.traffic_percentage,
                         }
                     }
                 }
@@ -54,14 +51,12 @@ pub fn get_fault_injection_json_all_vs(svc: &str, dr_name: &str, namespace: &str
 fn get_fault_injection_json_header_vs(
     svc: &str,
     dr_name: &str,
-    namespace: &str,
-    header: &str,
-    header_name: &str,
+    opts: &crate::chaos::Opts,
 ) -> value::Value {
     return json!({
         "apiVersion": "networking.istio.io/v1alpha3",
         "kind": "DestinationRule",
-        "metadata": { "name": dr_name, "namespace": namespace},
+        "metadata": { "name": dr_name, "namespace": &opts.namespace},
         "spec": {
             "hosts": [svc],
             "http": [{
@@ -72,16 +67,16 @@ fn get_fault_injection_json_header_vs(
                 }],
                 "fault": {
                     "delay": {
-                        "fixedDelay": "7s",
+                        "fixedDelay": &opts.delay,
                         "percentage": {
-                            "value": "100"
+                            "value": &opts.traffic_percentage
                         }
                     }
                 },
                 "match": [{
                     "headers": {
-                        header_name: {
-                            "exact": header
+                        opts.header_key.as_ref().unwrap(): {
+                            "exact": opts.header_value.as_ref().unwrap()
                         }
                     }
                 }]
