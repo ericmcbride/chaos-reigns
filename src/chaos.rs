@@ -1,6 +1,6 @@
 use kube_async::client::APIClient;
-use std::io::{Error, ErrorKind};
 use structopt::StructOpt;
+use std::io::{Error, ErrorKind};
 
 #[derive(Clone, Debug, StructOpt)]
 #[structopt(
@@ -153,13 +153,6 @@ pub async fn chaos_reigns(
     opts: &Opts,
 ) -> Result<(), Box<dyn ::std::error::Error>> {
     let crd_name = format!("{}-chaos", &svc);
-
-    if opts.random {
-        return Err(Box::new(Error::new(
-            ErrorKind::Other,
-            "random only partially implemented, feature coming soon",
-        )));
-    }
 
     // Always delete the virtual service first to make sure 503s dont happen
     if opts.delete {

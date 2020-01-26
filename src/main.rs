@@ -12,6 +12,11 @@ async fn main() -> Result<(), Box<dyn ::std::error::Error>> {
     let client = APIClient::new(config);
     let opts = chaos::get_chaos_opts();
 
+    if opts.random {
+        println!("random only partially implemented, feature coming soon");
+        return Ok(())
+    }
+
     //gotta figure this out
     let inner_opts = opts.clone();
     let svc = if opts.random {
