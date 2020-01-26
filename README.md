@@ -10,7 +10,11 @@ This library has helper functions, so you can make your own Rust CLI tool.  Its 
 ### Fault-Injection
 - What is fault injection? 
 ```
-Fault injection is a system testing method which involves the deliberate introduction of faults and errors into a system. It can be used to identify design or configuration weaknesses and to ensure that the system is able the handle faults and recover from error conditions. Faults can be introduced with compile-time injection (modifying the source code of the software) or with runtime injection, in which software triggers cause faults during specific scenarios.
+Fault injection is a system testing method which involves the deliberate introduction of faults and errors into
+a system. It can be used to identify design or configuration weaknesses and to ensure that the system 
+is able the handle faults and recover from error conditions. Faults can be introduced with compile-time 
+injection (modifying the source code of the software) or with runtime injection, in which software triggers 
+cause faults during specific scenarios.
 
 ```
   - Fault injection explained by https://banzaicloud.com/blog/istio-fault-injection/
@@ -18,7 +22,8 @@ Fault injection is a system testing method which involves the deliberate introdu
 ### Circuit Breaking
 - What is circuit breaking?
 ```
-Circuit breakers are another useful mechanism Istio provides for creating resilient microservice-based applications. In a circuit breaker, you set limits for calls to individual hosts within a service, such as the number of concurrent connections or how many times calls to this host have failed. Once that limit has been reached the circuit breaker “trips” and stops further connections to that host. Using a circuit breaker pattern enables fast failure rather than clients trying to connect to an overloaded or failing host.
+Circuit breakers are another useful mechanism Istio provides for creating resilient microservice-based
+applications. In a circuit breaker, you set limits for calls to individual hosts within a service, such as the number of concurrent connections or how many times calls to this host have failed. Once that limit has been reached the circuit breaker “trips” and stops further connections to that host. Using a circuit breaker pattern enables fast failure rather than clients trying to connect to an overloaded or failing host.
 ```
  - Istio Circuit Breaking https://istio.io/docs/concepts/traffic-management/
 
@@ -95,6 +100,6 @@ cargo run -- --service=book-svc --namespace=default --delete
 
 # TODO:
 Everything.  Below is the starting point.
-- Dynamically Update existing destination rules / virtual services to enable whatever Istio traffic management you need
-- Cleanup all rules if certain flag enabled
-- Plus a ton more
+- Find bugs with existing implementations
+- Once all other implementations are in, refactor code in a more generic way
+- The following chaos-types added: Mirroring, Traffic Shifting, Request Routing
