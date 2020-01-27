@@ -4,9 +4,9 @@ Ever look at Istio documentation and you are like cool, I just need to update th
 This library has helper functions, so you can make your own Rust CLI tool.  Its as easy as sticking the binary on a cron or in CI/CD, and wield the automated power of Istio.  
 
 # Current Supported Traffic Management:
-"fault"
-"circuit"
-"mirror"
+- "fault"
+- "circuit"
+- "mirror"
 
 # CLI Interface
 I would recommend taking a crash course on istio traffic management before trying to use the cli.
