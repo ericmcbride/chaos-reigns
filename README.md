@@ -104,7 +104,8 @@ cargo run -- --service=book-svc --namespace=default --chaos-type=fault
 - Example usage for deletion:
 ```
 cargo run -- --service=book-svc --namespace=default --delete
-`
+```
+
 ### Circuit Breaking
 - What is circuit breaking?
 
@@ -146,7 +147,8 @@ cargo run -- --service=book-svc --namespace=default --chaos-type=mirror
 - Example usage for deletion:
 ```
 cargo run -- --service=book-svc --namespace=default --delete
-`
+```
+
 # TODO:
 Everything.  Below is the starting point.
 - Find bugs with existing implementations
