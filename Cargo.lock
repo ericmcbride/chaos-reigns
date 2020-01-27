@@ -136,7 +136,7 @@ version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "chaos_reigns"
+name = "chaos-reigns"
 version = "0.1.0"
 dependencies = [
  "k8s-openapi 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",

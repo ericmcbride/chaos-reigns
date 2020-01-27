@@ -17,7 +17,7 @@ Eric McBride <ericmcbridedeveloper@gmail.com> github.com/ericmcbride
 Reign Chaos onto your Istio Service Mesh
 
 USAGE:
-    chaos_reigns [FLAGS] [OPTIONS] --chaos-type <chaos-type> --namespace <namespace> --service <service>
+    chaos-reigns [FLAGS] [OPTIONS] --chaos-type <chaos-type> --namespace <namespace> --service <service>
 
 FLAGS:
     -d, --delete     Delete applied rules

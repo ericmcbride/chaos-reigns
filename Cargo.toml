@@ -1,5 +1,5 @@
 [package]
-name = "chaos_reigns"
+name = "chaos-reigns"
 version = "0.1.0"
 authors = ["Eric McBride <ericmcbridedeveloper@gmail.com>"]
 edition = "2018"
