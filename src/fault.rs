@@ -55,7 +55,7 @@ fn get_fault_injection_json_header_vs(
 ) -> value::Value {
     return json!({
         "apiVersion": "networking.istio.io/v1alpha3",
-        "kind": "DestinationRule",
+        "kind": "VirtualService",
         "metadata": { "name": dr_name, "namespace": &opts.namespace},
         "spec": {
             "hosts": [svc],

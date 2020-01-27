@@ -140,6 +140,42 @@ pub struct Opts {
         hide_env_values = true
     )]
     pub max_eject_percent: usize,
+
+    /// The A Deployment label key for Global
+    #[structopt(
+        long,
+        env = "CHAOS_FIRST_DEPLOY_KEY_VALUE",
+        default_value = "version",
+        hide_env_values = true
+    )]
+    pub first_deploy_key_value: String,
+
+    /// The A Deployment label value for Global
+    #[structopt(
+        long,
+        env = "CHAOS_FIRST_DEPLOY_SUBSET_VALUE",
+        default_value = "v1",
+        hide_env_values = true
+    )]
+    pub first_deploy_subset_value: String,
+
+    /// The B Deployment label key for Global
+    #[structopt(
+        long,
+        env = "CHAOS_SECOND_DEPLOY_KEY_VALUE",
+        default_value = "version",
+        hide_env_values = true
+    )]
+    pub second_deploy_key_value: String,
+
+    /// The B Deployment label value for Global
+    #[structopt(
+        long,
+        env = "CHAOS_SECOND_DEPLOY_SUBSET_VALUE",
+        default_value = "v2",
+        hide_env_values = true
+    )]
+    pub second_deploy_subset_value: String,
 }
 
 pub fn get_chaos_opts() -> Opts {
@@ -176,6 +212,7 @@ async fn run_tests(
     match &opts.chaos_type.as_ref().unwrap()[..] {
         "fault" => crate::fault::run_fault_test(&client, &svc, &crd_name, &opts).await,
         "circuit" => crate::circuit::run_circuit_test(&client, &svc, &crd_name, &opts).await,
+        "mirror" => crate::mirror::run_mirror_test(&client, &svc, &crd_name, &opts).await,
         _ => Err(Box::new(Error::new(ErrorKind::Other, "invalid chaos type"))),
     }
 }

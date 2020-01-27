@@ -6,29 +6,7 @@ This library has helper functions, so you can make your own Rust CLI tool.  Its 
 # Current Supported Traffic Management:
 "fault"
 "circuit"
-
-### Fault-Injection
-- What is fault injection? 
-
-Fault injection is a system testing method which involves the deliberate introduction of faults and errors into
-a system. It can be used to identify design or configuration weaknesses and to ensure that the system 
-is able the handle faults and recover from error conditions. Faults can be introduced with compile-time 
-injection (modifying the source code of the software) or with runtime injection, in which software triggers 
-cause faults during specific scenarios.
-  
-  - Fault injection explained by https://banzaicloud.com/blog/istio-fault-injection/
-
-### Circuit Breaking
-- What is circuit breaking?
-
-Circuit breakers are another useful mechanism Istio provides for creating resilient microservice-based
-applications. In a circuit breaker, you set limits for calls to individual hosts within a service, 
-such as the number of concurrent connections or how many times calls to this host have failed. 
-Once that limit has been reached the circuit breaker “trips” and stops further connections to that
-host. Using a circuit breaker pattern enables fast failure rather than clients trying to connect 
-to an overloaded or failing host.
- 
- - Istio Circuit Breaking https://istio.io/docs/concepts/traffic-management/
+"mirror"
 
 # CLI Interface
 I would recommend taking a crash course on istio traffic management before trying to use the cli.
@@ -60,6 +38,12 @@ OPTIONS:
         --delay <delay>
             Simulated Delay for requests coming to envoy ex: 7s for Global [env: CHAOS_DELAY]  [default: 7s]
 
+        --first-deploy-key-value <first-deploy-key-value>
+            The A Deployment label key for Global [env: CHAOS_FIRST_DEPLOY_KEY_VALUE]  [default: version]
+
+        --first-deploy-subset-value <first-deploy-subset-value>
+            The A Deployment label value for Global [env: CHAOS_FIRST_DEPLOY_SUBSET_VALUE]  [default: v1]
+
         --header-key <header-key>
             Header key to be passed to request in istio [env: CHAOS_HEADER_KEY]
 
@@ -84,12 +68,42 @@ OPTIONS:
     -n, --namespace <namespace>
             Kubernetes Namespace for tests to be ran on [env: CHAOS_NAMESPACE]
 
+        --second-deploy-key-value <second-deploy-key-value>
+            The B Deployment label key for Global [env: CHAOS_SECOND_DEPLOY_KEY_VALUE]  [default: version]
+
+        --second-deploy-subset-value <second-deploy-subset-value>
+            The B Deployment label value for Global [env: CHAOS_SECOND_DEPLOY_SUBSET_VALUE]  [default: v2]
+
     -s, --service <service>
             What service should be attacked in the kubernetes namespace [env: CHAOS_SERVICE]
 
         --traffic-percentage <traffic-percentage>
             Percentage of traffic ex 100 for Global [env: CHAOS_TRAFFIC_PERCENTAGE]  [default: 100]
 ```
+
+### Fault-Injection
+- What is fault injection? 
+
+Fault injection is a system testing method which involves the deliberate introduction of faults and errors into
+a system. It can be used to identify design or configuration weaknesses and to ensure that the system 
+is able the handle faults and recover from error conditions. Faults can be introduced with compile-time 
+injection (modifying the source code of the software) or with runtime injection, in which software triggers 
+cause faults during specific scenarios.
+  
+  - Fault injection explained by https://banzaicloud.com/blog/istio-fault-injection/
+
+### Circuit Breaking
+- What is circuit breaking?
+
+Circuit breakers are another useful mechanism Istio provides for creating resilient microservice-based
+applications. In a circuit breaker, you set limits for calls to individual hosts within a service, 
+such as the number of concurrent connections or how many times calls to this host have failed. 
+Once that limit has been reached the circuit breaker “trips” and stops further connections to that
+host. Using a circuit breaker pattern enables fast failure rather than clients trying to connect 
+to an overloaded or failing host.
+ 
+ - Istio Circuit Breaking https://istio.io/docs/concepts/traffic-management/
+
 
 - Example usage for deployment:
 ```
@@ -101,8 +115,18 @@ cargo run -- --service=book-svc --namespace=default --chaos-type=fault
 cargo run -- --service=book-svc --namespace=default --delete
 ```
 
+### Mirroring
+- What is mirroring in istio?
+
+Traffic mirroring, also called shadowing, is a powerful concept that allows feature teams to bring 
+changes to production with as little risk as possible. Mirroring sends a copy of live traffic
+to a mirrored service. The mirrored traffic happens out of band of the critical request path 
+for the primary service.
+
+- Istio Mirroring https://istio.io/docs/tasks/traffic-management/mirroring/
+
 # TODO:
 Everything.  Below is the starting point.
 - Find bugs with existing implementations
 - Once all other implementations are in, refactor code in a more generic way
-- The following chaos-types added: Mirroring, Traffic Shifting, Request Routing
+- The following chaos-types added: Traffic Shifting, Request Routing
