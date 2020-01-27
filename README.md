@@ -12,6 +12,10 @@ This library has helper functions, so you can make your own Rust CLI tool.  Its 
 I would recommend taking a crash course on istio traffic management before trying to use the cli.
 Chaos-reigns does not do the deployments for you, but instead updates the Istio CRD's for you in an
 automated manner.
+
+NOTE: All cli examples use default types.  There are several cli options that go along with every
+management types
+
 ```
 Eric McBride <ericmcbridedeveloper@gmail.com> github.com/ericmcbride
 Reign Chaos onto your Istio Service Mesh
@@ -90,8 +94,17 @@ is able the handle faults and recover from error conditions. Faults can be intro
 injection (modifying the source code of the software) or with runtime injection, in which software triggers 
 cause faults during specific scenarios.
   
-  - Fault injection explained by https://banzaicloud.com/blog/istio-fault-injection/
+- Fault injection explained by https://banzaicloud.com/blog/istio-fault-injection/
 
+- Example usage for deployment:
+```
+cargo run -- --service=book-svc --namespace=default --chaos-type=fault
+```
+
+- Example usage for deletion:
+```
+cargo run -- --service=book-svc --namespace=default --delete
+`
 ### Circuit Breaking
 - What is circuit breaking?
 
@@ -107,7 +120,7 @@ to an overloaded or failing host.
 
 - Example usage for deployment:
 ```
-cargo run -- --service=book-svc --namespace=default --chaos-type=fault
+cargo run -- --service=book-svc --namespace=default --chaos-type=circuit
 ```
 
 - Example usage for deletion:
@@ -125,8 +138,18 @@ for the primary service.
 
 - Istio Mirroring https://istio.io/docs/tasks/traffic-management/mirroring/
 
+- Example usage for deployment:
+```
+cargo run -- --service=book-svc --namespace=default --chaos-type=mirror
+```
+
+- Example usage for deletion:
+```
+cargo run -- --service=book-svc --namespace=default --delete
+`
 # TODO:
 Everything.  Below is the starting point.
 - Find bugs with existing implementations
 - Once all other implementations are in, refactor code in a more generic way
 - The following chaos-types added: Traffic Shifting, Request Routing
+- Update readme explaining every option and what it does
